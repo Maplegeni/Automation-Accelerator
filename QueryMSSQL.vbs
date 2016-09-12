@@ -38,12 +38,12 @@
 '			'Set properties
 '			With oQuery
 '				'Mandatory
-'				.IP = 			"10.155.18.50"
-'				.PORT = 		"3341"
-'				.DBUserID = 	"TSTQA19"
-'				.DBPassword = 	"12345Qwertiko"
-'				.DBName = 		"WOE"
-'				.TableName = 	"ORDER_ITEM"
+'				.IP = 			"<DB IP >"
+'				.PORT = 		"<DB Port>"
+'				.DBUserID = 	"<DB UserName>"
+'				.DBPassword = 	"<DB Password>"
+'				.DBName = 		"<DB_Name>"
+'				.TableName = 	"<DB_Table>"
 '				'Optional
 '				.Condition = 	"RECORD_TYPE_CD = 'SO'"
 '				.Debug = True
@@ -52,8 +52,6 @@
 
 ' Returns:
 '	Results Dictiobary object				
-' ChangeLog:
-'07-February-2016 | Eugene  | Initial Version
 ' *******************************************************************************
 
 Option Explicit
@@ -91,8 +89,8 @@ Class QueryMSSQL
 		m_sDBName = vbNullString
 		m_sDBSchema = vbNullString
 		m_sTblName = vbNullString
-		m_sUserID = vbNullString   '"TSTQA19" 			'Default - for DEV
-		m_sPassword = vbNullString '"12345Qwertiko" 	'Default - for DEV
+		m_sUserID = vbNullString   
+		m_sPassword = vbNullString 
 		Set m_dictResults = CreateObject("Scripting.Dictionary")
 		m_sQuery = "SELECT "
 		Set m_oConn = Nothing
