@@ -4,20 +4,14 @@ Public gScreenshotPath,gHostAPI,gPortAPI,gMethodAPI,gHostLogs,gPortLogs,gLogsPat
 Public gDBName,gSchemaName,gIPAddress
 
 
-'QCpath = "[ALM\Resources] Resources\ATP_R3\UFTResources\ToDelete\"
-'FileName = "AOE_Global.ini"
-'Dim App 'As Application
-'Set App = CreateObject("QuickTest.Application")
-'App.Folders.Add(QCpath)
-'g_const_TEST_RESOURCES_PATH = PathFinder.Locate("[ALM\Resources] Resources\ATP_R3\UFTResources\ToDelete\")
 
 '===============================================================
 'Global Init file Location
 'Common Location for ALM execution
-gINIFile= "\\TDWM-SRV-TOR2\WMTS\COMMON\Automation\UI\AOE_SPA\ComplexOrder\AOE_Global.ini"
+gINIFile= "<ALM_Project>\Global.ini"
 
 'File Location for Local execution
-'gINIFile= "\\TDWM-SRV-TOR2\WMTS\COMMON\Quality Assurance BSM Team\BSM Automation\ATPR3\Simple Order\SingleOrder_WorkingCopy_Greeni\AOE_Global.ini"
+'gINIFile= "<Local_Folder>\Global.ini"
 
 
 
@@ -32,7 +26,6 @@ Public g_DB2UserID,g_DB2UserPwd
     '===============================================================
 ' Name: 			Class LoadDataOne
 ' Purpose: 		  Creates a collection of Dictionary objects containg test data - one sheet
-' Author: 			Rajender Reddy
 '===============================================================
 Class CLoadDataOne
 
@@ -105,8 +98,6 @@ End Function
 '===============================================================
 ' Name: 			Class LoadDataTwo
 ' Purpose: 		  Creates a collection of Data Dictionary objects containing test data - two sheets
-' Author: 			Rajender Reddy
-
 '===============================================================
 Class CLoadDataTwo
 
@@ -186,8 +177,6 @@ End Function
 '===============================================================
 ' Name: 			Class CLoadDataFromINI
 ' Purpose: 		  Creates a collection of Data Dictionary objects containing global data from INI file
-' Author: 			Rajender Reddy
-
 '===============================================================
 
 Class CLoadDataFromINI
