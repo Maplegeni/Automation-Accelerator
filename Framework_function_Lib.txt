@@ -1,0 +1,373 @@
+'Declaration of Global Variables
+Public gBrowser,gTestResources,gINIFile, gEnvironment,gUserID,gUserPwd,gINIDirectory,g_const_TEST_RESOURCES_PATH,gAppUrl,gTakeScreenshot, gORPath,gORName, gLibPath,gGUIfilename,gUtilitiesfilename
+Public gScreenshotPath,gHostAPI,gPortAPI,gMethodAPI,gHostLogs,gPortLogs,gLogsPath,gLogsUser,gLogsPassword
+Public gDBName,gSchemaName,gIPAddress
+
+
+'QCpath = "[ALM\Resources] Resources\ATP_R3\UFTResources\ToDelete\"
+'FileName = "AOE_Global.ini"
+'Dim App 'As Application
+'Set App = CreateObject("QuickTest.Application")
+'App.Folders.Add(QCpath)
+'g_const_TEST_RESOURCES_PATH = PathFinder.Locate("[ALM\Resources] Resources\ATP_R3\UFTResources\ToDelete\")
+
+'===============================================================
+'Global Init file Location
+'Common Location for ALM execution
+gINIFile= "\\TDWM-SRV-TOR2\WMTS\COMMON\Automation\UI\AOE_SPA\ComplexOrder\AOE_Global.ini"
+
+'File Location for Local execution
+'gINIFile= "\\TDWM-SRV-TOR2\WMTS\COMMON\Quality Assurance BSM Team\BSM Automation\ATPR3\Simple Order\SingleOrder_WorkingCopy_Greeni\AOE_Global.ini"
+
+
+
+Public g_DATA_TABLE_NAME : g_DATA_TABLE_NAME=""
+Public g_TEST_NAME : g_TEST_NAME=Environment.Value("TestName")
+Public g_TEST_DIRECTORY : g_TEST_DIRECTORY=Environment.Value("TestDir")
+Public g_DB2UserID,g_DB2UserPwd
+'gEnvironment = TestArgs("Environment")
+
+
+
+    '===============================================================
+' Name: 			Class LoadDataOne
+' Purpose: 		  Creates a collection of Dictionary objects containg test data - one sheet
+' Author: 			Rajender Reddy
+'===============================================================
+Class CLoadDataOne
+
+				Public Default Function Load(ByVal sWorkBook, ByVal sSheet )
+								Set Load =  extractData( sWorkBook,  sSheet )		
+				End Function
+
+				Private Function extractData(ByVal sWorkBook, ByVal sSheet )	
+									Dim objTestData, objDictChild
+									Dim objConn, objRS
+									Dim sQuery, i, j
+
+'									sWorkBook = TEST_DATA_PATH & sWorkBook									
+									If  Not reportFileExist( sWorkBook )Then Reporter.ReportEvent micFail, "Load Data File ", sWorkBook & "   File does not exist" : ExitTest
+																	
+									Set objConn = CreateObject("ADODB.Connection")
+									Set objRS = CreateObject("ADODB.RecordSet")
+
+									On Error Resume Next
+									'Open Connection
+'									objConn.Open "Provider=Microsoft.Jet.OLEDB.4.0;" &_
+									objConn.Open "Provider=Microsoft.ACE.OLEDB.12.0;" &_
+												"Data Source=" & sWorkBook & ";" & _
+												"Extended Properties=""Excel 8.0;HDR=Yes;"";"
+									If errorOccured("ExtractTestData") Then objConn.Close : ExitTest
+
+									'sQuery = "Select * From [" & sSheet & "$] WHERE Instruction='Run'  AND TestCase='"& g_TEST_NAME &"'"
+									sQuery = "Select * From [" & sSheet & "$] WHERE TestCase='"& g_TEST_NAME &"'"
+									objRS.Open sQuery, objConn, 3, 3, 1
+									If errorOccured("ExtractTestData") Then objRS.Close : objConn.Close : ExitTest
+									On Error GoTo 0
+
+									Set objTestData = CreateObject("Scripting.Dictionary")
+									For i = 1 to objRS.RecordCount
+													Set objDictChild = CreateObject("Scripting.Dictionary")												
+													For j = 1 to objRS.Fields.Count - 1
+'																Print objRS( j ).Name & "     " & objRS.Fields( j )
+																objDictChild.Add "" & objRS( j ).Name, "" & objRS.Fields( j )
+'																objDictChild.Add CStr(objRS(j).Name), CStr(objRS.Fields(j))
+													
+													Next
+													objTestData.Add i, objDictChild
+												   objRS.MoveNext 
+									Next
+'									Dim oField
+'									i = 1
+'									Do Until objRS.EOF
+'										Set objDictChild = CreateObject("Scripting.Dictionary")
+'										For each oField in  objRS.Fields
+'											objDictChild.Add oField.Name, oField.Value 'Cstr(oField.Value)														
+'										Next
+'										objTestData.Add i, objDictChild
+'										i = i + 1
+'										objRS.MoveNext
+'									Loop	
+'									
+									
+									Set extractData = objTestData
+									objRS.Close : objConn.Close
+									Set objRS = Nothing : Set objConn = Nothing
+				    End Function	
+
+											
+End Class
+
+
+Public Function GeTNewCLoadDataOne()
+			Set GeTNewCLoadDataOne=New CLoadDataOne
+End Function
+'===============================================================
+' Name: 			Class LoadDataTwo
+' Purpose: 		  Creates a collection of Data Dictionary objects containing test data - two sheets
+' Author: 			Rajender Reddy
+
+'===============================================================
+Class CLoadDataTwo
+
+				Public Default Function Load( ByVal sWorkBook, ByVal sSheet1, ByVal sSheet2 ) 					  
+								Set Load =  extractData( sWorkBook, sSheet1, sSheet2 )   			
+				End Function
+
+				Private Function extractData( ByVal sWorkBook, ByVal sSheet1, ByVal sSheet2 )
+									Dim objTestData, objDictChild
+									Dim objConn, objRS, objRSSheet1, objRSSheet2
+									Dim sQuery, i, j
+
+'									sWorkBook = TEST_DATA_PATH & sWorkBook
+									If  Not reportFileExist( sWorkBook )Then Reporter.ReportEvent micFail, "Load Data File ", sWorkBook & "   File does not exist" : ExitTest
+
+									Set objConn = CreateObject("ADODB.Connection")
+									Set objRS = CreateObject("ADODB.RecordSet")
+
+									On Error Resume Next
+									'Open Connection
+'									objConn.Open "Provider=Microsoft.Jet.OLEDB.4.0;" &_
+									objConn.Open "Provider=Microsoft.ACE.OLEDB.12.0;" &_
+												"Data Source=" & sWorkBook & ";" & _
+												"Extended Properties=""Excel 8.0;HDR=Yes;"";"
+									If errorOccured("ExtractTestData") Then objConn.Close : ExitTest
+
+									sQuery = "Select *From [" & sSheet1 & "$] WHERE Instruction='run' "		'AND TestCase=["& strTestCase & "$]"
+									objRS.Open sQuery, objConn, 3, 3, 1
+									If errorOccured("ExtractTestData") Then objRS.Close : objConn.Close : ExitTest
+									On Error GoTo 0
+
+									Set objTestData = CreateObject("Scripting.Dictionary")
+									For i = 1 to objRS.RecordCount
+
+													Set objSheet2 = CreateObject("Scripting.Dictionary")
+													Set objRSTwo = CreateObject("ADODB.RecordSet")
+
+													On Error Resume Next
+													sQuery1 = "Select *From [" & sSheet2 & "$] WHERE TestCase=" & "'" & objRS.Fields( 2 ) & "'" 
+													objRSTwo.Open sQuery1, objConn, 3, 3, 1
+													If Not errorOccured("ExtractTestData") Then objRSTwo.Close : objRS.Close : objConn.Close : ExitTest
+													On Error GoTo 0
+
+													For iRows = 1 to objRSTwo.RecordCount + 1
+																Set objTwo = CreateObject("Scripting.Dictionary")
+																If iRows = 1 Then
+																			For j = 0 to objRS.Fields.Count - 1
+																						objTwo.Add "" & objRS( j ).Name, "" & objRS.Fields( j )
+																			Next
+																			objSheet2.Add iRows, objTwo
+																			objRS.MoveNext 
+																Else 
+																			For j = 0 to objRSTwo.Fields.Count - 1
+																						objTwo.Add "" & objRSTwo( j ).Name, "" & objRSTwo.Fields( j )
+																			Next
+																			objSheet2.Add iRows, objTwo
+																			objRSTwo.MoveNext 
+																End If
+														Next
+														objTestData.Add i, objSheet2	
+														objRSTwo.Close
+														Set objTwo = Nothing : Set objSheet2 = Nothing : Set objRSTwo = Nothing
+										Next
+										Set extractData = objTestData
+										objRS.Close : objConn.Close
+										Set objRS = Nothing : Set objConn = Nothing
+				    End Function			
+End Class
+
+
+Public Function GetNewCLoadDataTwo()
+
+   Set GetNewCLoadDataTwo=New CLoadDataTwo
+
+End Function
+
+'===============================================================
+' Name: 			Class CLoadDataFromINI
+' Purpose: 		  Creates a collection of Data Dictionary objects containing global data from INI file
+' Author: 			Rajender Reddy
+
+'===============================================================
+
+Class CLoadDataFromINI
+							
+							Public Default Function Load(strMyFilePath)
+							
+												Set Load=getINIData(strMyFilePath)
+							
+							End Function
+
+							
+							Private Function getINIData(myFilePath)
+							
+							
+												
+													Const ForReading   = 1
+													Const ForWriting   = 2
+													Const ForAppending = 8
+												
+													Dim intEqualPos
+													Dim objFSO, objIniFile
+													Dim strFilePath, strKey, strLeftString, strLine, strSection
+												
+													Set objFSO = CreateObject( "Scripting.FileSystemObject" )
+												
+												   
+													strFilePath = Trim( myFilePath )   
+												   
+													Set DICT_objINIData = CreateObject("Scripting.Dictionary")	
+													If objFSO.FileExists( strFilePath ) Then
+														Set objIniFile = objFSO.OpenTextFile( strFilePath, ForReading, False )
+														Do While objIniFile.AtEndOfStream = False
+															strLine = Trim( objIniFile.ReadLine )
+
+															'Read only if the line is not commented
+															If left(strLine,1)<>"'" Then
+																 intEqualPos = InStr( 1, strLine, "=", 1 )
+																 If intEqualPos>0 Then
+																		 strLeftString = Trim( Left( strLine, intEqualPos - 1 ) )
+																		 strRightString = Trim(Replace(Trim(Right(strLine,Len(strLine)-(intEqualPos))),chr(34),""))
+																		'  strRightString = Trim(Right(strLine,Len(strLine)-(intEqualPos+1)))
+																		' strRightString = Trim(Left(strRightString,Len(strRightString)-1))
+												
+																		DICT_objINIData.Add ""&strLeftString, ""&strRightString
+																 End If
+															End If
+															' Abort if the end of the INI file is reached
+																	If objIniFile.AtEndOfStream Then 
+																		Exit Do
+																	End If
+												
+																	' Continue with next line
+																   ' strLine = Trim( objIniFile.ReadLine )
+														Loop
+												
+														Set getINIData=DICT_objINIData
+														objIniFile.Close
+												
+													Else
+														'WScript.Echo strFilePath & " doesn't exists. Exiting..."														
+														'Wscript.Quit 1
+														Reporter.ReportEvent micFail,"Get data from INI file","INI file not found: "&strFilePath
+													End If
+
+							End Function
+
+End Class
+
+Public Function GetNewCLoadDataFromINI()
+   Set GetNewCLoadDataFromINI = New CLoadDataFromINI
+End Function
+
+
+Public Function reportFileExist( ByVal sFileName )
+	Dim fso
+	Set fso = CreateObject("Scripting.FileSystemObject")  
+	reportFileExist= fso.FileExists(sFileName)
+	Set fso = Nothing
+End Function
+
+
+
+
+Function loadData()
+
+	Dim DICT_DataIter1
+	
+	loadINIData (gINIFile)
+'	loadobjectrepository gORPath,gORName
+'	loadlibraryfiles gLibPath,gGUIfilename,gUtilitiesfilename
+	Set DICT_DataIter1=loadTestData(gEnvironment,g_DATA_TABLE_NAME)
+	Set loadData=DICT_DataIter1
+
+End Function
+
+Function loadobjectrepository(gORPath,gORName)
+	strORPath = Replace(gORPath,chr(34),"")
+	strORName = Replace(gORName,chr(34),"")
+	strORfullpath = strORPath&strORName
+	RepositoriesCollection.RemoveAll
+    RepositoriesCollection.Add(strORfullpath)
+End Function
+
+Function loadlibraryfiles(gLibPath,gGUIfilename,gUtilitiesfilename)
+	strfunLibPath = Replace(gLibPath,chr(34),"")
+	strGUIfilename = Replace(gGUIfilename,chr(34),"")
+	strUtilityfilename = Replace(gUtilitiesfilename,chr(34),"")
+	LoadFunctionLibrary strfunLibPath&strGUIfilename, strfunLibPath&strUtilityfilename
+End Function
+
+
+Function loadINIData(gINIFile)
+
+	Dim objINIClass,DICT_INIData
+	
+	Set objINIClass= GetNewCLoadDataFromINI()
+	Set DICT_INIData=objINIClass.Load(gINIFile)
+
+	'Assign values from INI file to global variables
+	gBrowser=DICT_INIData.Item("Browser")
+	gTestResources=DICT_INIData.Item("Resources_Path")	
+	gTakeScreenshot=DICT_INIData.Item("TakeScreenshot")	
+	gScreenshotPath=DICT_INIData.Item("ScreenshotPath")	
+	gEnvironment=DICT_INIData.Item("Environment")
+	gORName = DICT_INIData.Item("StrORName")
+	gORPath = DICT_INIData.Item("StrORPath")
+	gLibPath = DICT_INIData.Item("strLibPath")
+	gGUIfilename = DICT_INIData.Item("GUI_function_Lib")
+	gUtilitiesfilename = DICT_INIData.Item("Utilities_function_Lib")
+	gHostAPI=DICT_INIData.Item("sHostAPI")
+	gPortAPI=DICT_INIData.Item("sPortAPI")
+	gMethodAPI=DICT_INIData.Item("sMethodAPI")
+	gHostLogs=DICT_INIData.Item("sHostLogs")
+	gPortLogs=DICT_INIData.Item("sPortLogs")
+	gLogsPath=DICT_INIData.Item("sLogsPath")
+	gLogsUser=DICT_INIData.Item("sLogsUser")
+	gLogsPassword=DICT_INIData.Item("sLogsPassword")
+	gDBName = DICT_INIData.Item("DBName")
+	gSchemaName = DICT_INIData.Item("DBSchema")
+	gIPAddress =  DICT_INIData.Item("IP")
+
+	'gEnvironment = TestArgs("Environment")
+	
+	'Assing url based on environment
+	Select Case Ucase(gEnvironment)
+	
+		Case "DIT"
+			gAppUrl=DICT_INIData.Item("DITLoginUrl")
+		Case "SIT"
+			gAppUrl=DICT_INIData.Item("SITLoginUrl")
+		Case "BAT"
+			gAppUrl=DICT_INIData.Item("BATLoginUrl")
+		Case "PAT"
+			gAppUrl=DICT_INIData.Item("PATLoginUrl")
+		Case Else
+			gAppUrl=DICT_INIData.Item("DITLoginUrl")
+		
+	End Select	
+	
+
+End Function
+
+
+
+Public Function loadTestData(strEnv,strDataTableFileName)	
+
+	Dim DICT_TData,DICT_TDataIeterOne,strDT,objTDClass
+	
+	'Get test data
+	strDT= Replace(gTestResources & "Data\" & g_DATA_TABLE_NAME,chr(34),"")
+	'strDT= Replace(gTestResources & g_DATA_TABLE_NAME,chr(34),"")
+	Set objTDClass=GeTNewCLoadDataOne()
+	Set DICT_TData=objTDClass.Load(strDT,strEnv)
+	'Set DICT_TDataIeterOne=DICT_TData.Item(1)
+	
+	'Return the data dictionary
+	'Set loadTestData = DICT_TDataIeterOne
+	Set loadTestData = DICT_TData
+	
+	
+End Function
+
+ 
